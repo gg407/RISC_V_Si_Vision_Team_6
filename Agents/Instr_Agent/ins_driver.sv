@@ -27,7 +27,6 @@ class ins_driver extends uvm_driver#(ins_seq_item);
                 seq_item_port.get_next_item(req);
                     capture(req);
                 seq_item_port.item_done (req);
-                    @(posedge vif.clk)
                 seq_item_port.get_next_item(rsp);
                 drive(rsp);
                 vif.instr_rvalid_i = 1'b1;
