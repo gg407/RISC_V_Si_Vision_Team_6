@@ -20,10 +20,10 @@ class ins_driver extends uvm_driver#(ins_seq_item);
         `uvm_info("INS Driver", "Running driver", UVM_MEDIUM)
         //reset();
         forever begin
+            vif.instr_gnt_i = 1'b1;
             @(posedge vif.clk)
             vif.instr_rvalid_i = 1'b0;
             if(vif.instr_req_o) begin 
-                vif.instr_gnt_i = 1'b1;
                 seq_item_port.get_next_item(req);
                     capture(req);
                 seq_item_port.item_done (req);
