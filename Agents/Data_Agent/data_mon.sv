@@ -41,7 +41,7 @@ class data_mon extends uvm_monitor;
        data_seq_item data_item = data_seq_item::type_id::create("data_item");
       @(posedge vif.clk_i);
       
-      if (vif.req) begin
+      if (vif.req && vif.gnt) begin
         data_item.we = vif.we;
         data_item.be = vif.be;
         data_item.addr = vif.addr;
