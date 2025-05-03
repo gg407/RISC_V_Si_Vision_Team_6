@@ -1,9 +1,9 @@
-class ins_driver extends uvm_driver#(ins_seq_item);
-    `uvm_component_utils(ins_driver)
+class instruction_driver     extends uvm_driver#(ins_seq_item);
+    `uvm_component_utils(instruction_driver    )
     virtual ins_if vif;
     ins_seq_item req,rsp;
 
-    function new(string name="ins_driver", uvm_component parent=null);
+    function new(string name="instruction_driver    ", uvm_component parent=null);
         super.new(name, parent);
     endfunction
 
