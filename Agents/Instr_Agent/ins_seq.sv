@@ -4,7 +4,7 @@ class inst_seq extends uvm_sequence #(inst_seq_item);
     ins_seq_item q [$:2];
     [31:0] inst_mem [int];
    // [31:0] inst_mem [32];
-
+    
     
     //inst_mem [0:inst_mem_size-1] = { 
     int num_items;
@@ -21,35 +21,41 @@ class inst_seq extends uvm_sequence #(inst_seq_item);
         if(!uvm_config_db#(ins_cfg)::get(m_sequencer, "", "cfg", cfg))
             `uvm_fatal("NOCFG", "No configuration object found");
         
-        inst_num = cfg.inst_num;
+        num_items = cfg.num_items;
         `uvm_info("Seq", "Finished pre body ", UVM_MEDIUM)
 
     endtask
 
     virtual task body();
+
         `uvm_info("Seq", "Starting sequence", UVM_MEDIUM)
+    
         req = seq_item::type_id::create("req");
         rsp = seq_item::type_id::create("rsp");
         for(int i=0;i<inst_num; i=i+4) begin
-            assert(rsp.randomize with { opcode !(inside {7'b1100011,7'b1101111,7'b1100111}); 
-                                        funct7 != 2'h01;});
+             assert(rsp.randomize() with {
+        !(opcode inside {7'b1100011, 7'b1101111, 7'b1100111});
+        !(opcode == 7'b0110011 && funct7 == 7'h01);
+    });
             inst_mem[i] = rsp.instruction;
         end
         rsp = seq_item::type_id::create("rsp");
-        while(req.instr_addr_o<inst_num)begin
+        for(int i=0 ;i<inst_num; i=i+4) begin
             start_item(req);
             finish_item(req);
             
             start_item(rsp);
-            rsp.copy(req);
-            if (inst_mem.exists(req.instr_addr_o)) begin
-                rsp.instr_rdata_i = inst_mem[req.instr_addr_o];
-            end else begin
-                rsp.instr_rdata_i = 32'h00000013; // NOP: ADDI x0, x0, 0
-                `uvm_warning("Driver SEQ", $sformatf("Sent NOP for missing addr 0x%08x", req.instr_addr_o));
-            end
-             
+             rsp.copy(req);
+             if (inst_mem.exists(req.instr_addr_o)) begin
+              rsp.instr_rdata_i = inst_mem[req.instr_addr_o];
+             end else begin
+             rsp.instr_rdata_i = 32'h00000013; // NOP: ADDI x0, x0, 0
+             `uvm_warning("SEQ", $sformatf("Sent NOP for missing addr 0x%08x", req.instr_addr_o));
+             end
             finish_item(rsp);
+
+
+
 
             // Non ideal case
             // if(rsp.grant) begin
