@@ -21,7 +21,7 @@ class inst_seq extends uvm_sequence #(inst_seq_item);
         if(!uvm_config_db#(ins_cfg)::get(m_sequencer, "", "cfg", cfg))
             `uvm_fatal("NOCFG", "No configuration object found");
         
-        num_items = cfg.num_items;
+        inst_num = cfg.inst_num;
         `uvm_info("Seq", "Finished pre body ", UVM_MEDIUM)
 
     endtask
@@ -31,11 +31,12 @@ class inst_seq extends uvm_sequence #(inst_seq_item);
         req = seq_item::type_id::create("req");
         rsp = seq_item::type_id::create("rsp");
         for(int i=0;i<inst_num; i=i+4) begin
-            assert(rsp.randomize);
+            assert(rsp.randomize with { opcode !(inside {7'b1100011,7'b1101111,7'b1100111}); 
+                                        funct7 != 2'h01;});
             inst_mem[i] = rsp.instruction;
         end
         rsp = seq_item::type_id::create("rsp");
-        for(int i=0 ;i<inst_num; i=i+4) begin
+        while(req.instr_addr_o<inst_num)begin
             start_item(req);
             finish_item(req);
             
