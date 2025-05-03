@@ -27,9 +27,7 @@ class inst_seq extends uvm_sequence #(inst_seq_item);
     endtask
 
     virtual task body();
-
         `uvm_info("Seq", "Starting sequence", UVM_MEDIUM)
-    
         req = seq_item::type_id::create("req");
         rsp = seq_item::type_id::create("rsp");
         for(int i=0;i<inst_num; i=i+4) begin
@@ -42,8 +40,14 @@ class inst_seq extends uvm_sequence #(inst_seq_item);
             finish_item(req);
             
             start_item(rsp);
-             rsp.copy(req);
-             rsp.instr_rdata_i = inst_mem[req.instr_addr_o];
+            rsp.copy(req);
+            if (inst_mem.exists(req.instr_addr_o)) begin
+                rsp.instr_rdata_i = inst_mem[req.instr_addr_o];
+            end else begin
+                rsp.instr_rdata_i = 32'h00000013; // NOP: ADDI x0, x0, 0
+                `uvm_warning("Driver SEQ", $sformatf("Sent NOP for missing addr 0x%08x", req.instr_addr_o));
+            end
+             
             finish_item(rsp);
 
             // Non ideal case
