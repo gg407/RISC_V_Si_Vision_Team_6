@@ -16,8 +16,10 @@ class virtual_seq extends uvm_sequence #(seq_item);
     `uvm_info(get_type_name(), "virtual_seq: Inside Body", UVM_LOW);
     Iseq = inst_seq::type_id::create("Iseq");
     Dseq = data_seq::type_id::create("Dseq");
-    
+
+    fork begin 
     Iseq.start(p_sequencer.seqr_I);
     Dseq.start(p_sequencer.seqr_D);
+    join any
   endtask
 endclass
