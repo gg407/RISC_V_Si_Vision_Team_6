@@ -1,44 +1,157 @@
+import risc_pkg::* ;
 class riscv_scoreboard extends uvm_scoreboard;
   `uvm_component_utils(riscv_scoreboard)
 
   // Virtual interface to DUT
   virtual riscv_if vif;
+  ins_seq_item inst_seq;
 
-  // Transaction type from monitor or sequence
-  typedef struct packed {
-    bit [31:0] instr;
-    logic [4:0] rs1, rs2, rd;
-    logic [31:0] alu_result;
-    logic [31:0] load_data;
-    logic wr_en;
-    logic valid;
-  } instr_info_t
 
-regfile[32];
-  // Pipeline stages
-    //fetch stage
-    logic [31:0] instr,pc; logic f_valid;
+  // Handle incoming instruction
+  function void inst_write(instr_item inst);
+    // Push incoming instruction into the queue
+    inst_seq<=inst;
+  endfunction
+    
+    logic [31:0] instr; instr_type ins_type; logic f_valid;
     // decode stage
-    logic [4:0] rs1, rs2, rd; logic [31:0] rs1_data, rs2_data,pc; logic [31:0] imm;  logic D_valid;
+    logic [4:0] rs1, rs2, rd_d; logic [31:0] rs1_data, rs2_data,pc; logic [31:0] imm_d;  logic D_valid;
     // execute stage alu stage
-    logic [31:0] alu_result;[6:0] opcode;[4:0] funct5;logic [2:0] funct3;logic [6:0] funct7; logic E_valid;
+    logic [4:0]rd_e;logic [31:0] alu_result,imm_e ;[6:0] opcode;[4:0] funct5;logic [2:0] funct3;logic [6:0] funct7; logic E_valid; int x,y;
     // memory stage load/store stage
     logic [31:0] load_data;logic [31:0] store_data;logic [31:0] store_addr;logic [31:0] load_addr;  
     // writeback stage register file stage
     logic [31:0] rf_write_data;logic [4:0] rf_write_addr;logic rf_write_en;logic [31:0] wb_data;logic [4:0] wb_addr;logic wb_en; logic W_valid;
 
 
-    reg_file[rd2]=rd2_data;
-    reg_file[rd1]=rd1_data;
+// task fetch(ins_seq_item seq)
+//   seq.Get_type();
+//   instr=seq.instr_rdata_i;
+//   pc= seq.instr_addr_o;
+//   inst_type=seq.inst_type
+// endtask
 
-            Fetch Decode Execute/Memory Writeback
-                 1      2              3
+task decode()
+  //inst.Get_type();
+  opcode<=inst.instr[6:0];
+  pc<=inst.instr_addr_o;
+  case(inst.opcode)
+    R_TYPE:
+      begin
+        rs1<=instr[19:15]; //not sure in all of the cases
+        rs2<=instr[24:20]; //not sure in all of the cases
+        rs1_data<=reg_file[instr[19:15]];
+        rs2_data<=reg_file[instr[24:20]];
+        rd_e<=instr[11:7];
+        funct3<=instr[14:12];
+        funct7<=instr[31:25];
+        imm_d<=0;
+      end
+    I_TYPE_0:
+      begin
+        rs1<=instr[19:15];
+        rs1_data<=reg_file[instr[19:15]];
+        rd_e<=instr[11:7];
+        funct3<=instr[14:12];
+        funct7<=0;
+        imm_d<={{20{instr[31]}},instr[31:20]} ;
+      end
+    I_TYPE_1:
+      begin
+        rs1<=instr[19:15];
+        rs1_data<=reg_file[instr[19:15]];
+        rd_e<=instr[11:7];
+        funct3<=instr[14:12];
+        funct7<=0;
+        imm_d<={{20{instr[31]}} ,instr[31:20]} ;
+      end
+    I_TYPE_2:
+      begin
+        rs1<=instr[19:15];
+        rs1_data<=reg_file[instr[19:15]];
+        rd_e<=instr[11:7];
+        funct3<=instr[14:12];
+        funct7<=0;
+        imm_d<={{20{instr[31]}} ,instr[31:20]} ;
+      end
+    S_TYPE:
+      begin
+        rs1<=instr[19:15];
+        rs2<=instr[24:20];
+        rs1_data<=reg_file[instr[19:15]];
+        rs2_data<=reg_file[instr[24:20]];
+        funct3<=instr[14:12];
+        funct7<=0;
+        imm_d<={ {20{instr[31]}},instr[31:25], instr[11:7] };
+      end
+    B_TYPE:
+      begin
+        rs1<=instr[19:15];
+        rs2<=instr[24:20];
+        rs1_data<=reg_file[instr[19:15]];
+        rs2_data<=reg_file[instr[24:20]];
+        funct3<=instr[14:12];
+        funct7<=0;
+        imm_d[0]<=0;
+        imm_d[11]<=instr[7];
+        imm_d[4:1]<=instr[11:8];
+        imm_d[10:5]<=instr[30:25];
+        imm_d[12]<=instr[31];
+      end
+    U_TYPE_0:
+      begin
+        rd_e<=instr[11:7];
+        funct3<=0;
+        funct7<=0;
+        imm_d[31:12]<={instr[31:12], 12'b0};
+      end
+    U_TYPE_1:
+      begin
+        rd_e<=instr[11:7];
+        funct3<=0;
+        funct7<=0;
+        imm_d<={ {12{instr[31]}}, instr[31:12] };
+      end
+    J_TYPE:
+      begin
+        rd_e<=instr[11:7];
+        funct3<=0;
+        funct7<=0;
+        imm_d<={ instr[31],instr[19:12],instr[20],instr[30:21],1'b0 };
+      end
+  endcase
+endtask
+task execute()
+  rf_write_addr<=rd_e;
+  rf_write_en<=1;
+  case(opcode)
+  7'b0010011:
+             case(funct3)
+                2'h00: rf_write_data<= rs1_data+imm_e;
+                2'h01: rf_write_data<= rs1_data<<imm[4:0];
+                2'h02: rf_write_data<= (signed'(rs1_data)<signed'(imm))? 1:0;
+                2'h03: rf_write_data<= (rs1_data<imm)? 1:0;
+                2'h04: rf_write_data<= rs1_data^imm;
+                2'h05: 
+                      if( imm[11:5]=4'h00) rf_write_addr<= rs1_data>>imm[4:0];
+                      else if(imm[11:5]=4'h20) rf_write_addr<= rs1_data>>>imm[4:0];
+                2'h06: rf_write_data<= rs1_data|imm;
+                2'h07: rf_write_data<= rs1_data&imm;
 
-          
+             endcase
+  7'b0110111: rf_write_data<= imm<<12;
+  7'b0010111: rf_write_data<= pc+(imm<<12);
 
+  endcase
+endtask
 
-    // pipeline stage info
-  //instr_info_t if_stage, id_stage, ex_stage ;
+task wb()
+    if(wb_addr!=0) begin
+      reg_file[wb_addr]<=rf_write_data;
+    end
+  
+endtask
+
 
   // Instruction queue for IF stage (to handle bursty traffic)
   riscv_instr_txn instr_q[$];  // Queue to hold instructions
@@ -87,12 +200,6 @@ endtask
       compare_with_dut();
     end
   endtask
-
-  // Handle incoming instruction
-  function void write(riscv_instr_txn t);
-    // Push incoming instruction into the queue
-    instr_q.push_back(t);
-  endfunction
 
 
     // Advance pipeline stages
