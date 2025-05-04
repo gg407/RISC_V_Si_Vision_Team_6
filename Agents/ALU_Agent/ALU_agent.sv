@@ -2,6 +2,7 @@ class ALU_agent extends uvm_agent;
   
   `uvm_component_utils(ALU_agent)
     monitor_mult mult_mon;
+    monitor_alu_div lu_div_mon;
   
   function new(string name, uvm_component parent);
     super.new(name,parent);
@@ -11,7 +12,8 @@ class ALU_agent extends uvm_agent;
     function void build_phase(uvm_phase phase);
     super.build_phase(phase);
       
-      mult_mon=monitor_mult::type_id::create("mult_mon",this);
+      mult_mon   =  monitor_mult::type_id::create("mult_mon",this);
+      lu_div_mon =  monitor_alu_div::type_id::create("lu_div_mon",this);
 
     endfunction:build_phase
 
