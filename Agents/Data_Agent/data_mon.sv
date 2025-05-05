@@ -39,20 +39,20 @@ class data_mon extends uvm_monitor;
   virtual task run_phase(uvm_phase phase);
     forever begin
        data_seq_item data_item = data_seq_item::type_id::create("data_item");
-      @(posedge vif.clk_i);
+      @(posedge vif.clk);
       
-      if (vif.req && vif.gnt) begin
-        data_item.we = vif.we;
-        data_item.be = vif.be;
-        data_item.addr = vif.addr;
-        data_item.wdata = vif.wdata;
+      if (vif.data_req_o && vif.data_gnt_i) begin
+        data_item.data_we_o = vif.data_we_o;
+        data_item.data_be_o = vif.data_be_o;
+        data_item.data_addr_o = vif.data_addr_o;
+        data_item.data_wdata_o = vif.data_wdata_o;
         data_item_queue.push_back(data_item);
       end
       
-      if (vif.rvalid) begin 
+      if (vif.data_rvalid_i) begin 
          data_item = data_item_queue.pop_front();
-        if (!data_item.we)
-          data_item.rdata = vif.rdata;
+        if (!data_item.data_we_o)
+          data_item.data_rdata_i = vif.data_rdata_i;
       `uvm_info("Data Monitor: ", {"Collect new data item: ", data_item.convert2string()}, UVM_HIGH)   
        data_mon_port.write(data_item);     
       end 
