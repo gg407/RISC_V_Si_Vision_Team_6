@@ -7,7 +7,7 @@ class data_seq extends uvm_sequence #(data_seq_item);
     //[31:0] data_mem [32];
 
     
-    int num_items;
+    int data_mem_size;
 
     function new(string name="data_seq");
         super.new(name);
@@ -20,7 +20,7 @@ class data_seq extends uvm_sequence #(data_seq_item);
         if(!uvm_config_db#(data_agent_cfg)::get(get_sequencer(), "", "cfg", cfg))
             `uvm_fatal("NOCFG", "No configuration object found");
         
-        num_items = cfg.num_items;
+        data_mem_size = cfg.data_mem_size;
         `uvm_info("Seq", "Finished pre body ", UVM_MEDIUM)
 
     endtask
@@ -34,7 +34,7 @@ class data_seq extends uvm_sequence #(data_seq_item);
         {data_mem[0],data_mem[1],data_mem[2],data_mem[3]} = 32'b0;               // zero
         {data_mem[4],data_mem[5],data_mem[6],data_mem[7]} = {1'b0,31{1'b1}};     // max positive
         {data_mem[8],data_mem[8],data_mem[10],data_mem[11]} = {1'b1,31{1'b0}};   // max positive
-        for(int i=12;i<inst_num; i=i+4) begin
+        for(int i=12;i<data_mem_size; i=i+4) begin
             assert(rsp.randomize);
             {data_mem[i],data_mem[i+1],data_mem[i+2],data_memi[i+3]}= rsp.data;
         end
