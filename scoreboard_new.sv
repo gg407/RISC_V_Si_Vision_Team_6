@@ -101,22 +101,22 @@ task decode()
   endcase
 endtask
 task execute()
-  imm_e<=imm_d;
+  //imm_e<=imm_d;
   rf_write_addr<=rd_e;
   rf_write_en<=1;
   case(opcode)
   I_TYPE_0:
              case(funct3)
-                addi: rf_write_data<= rs1_data+imm_e;
-                sllI: rf_write_data<= rs1_data<<imm_e[4:0];
-                sltI: rf_write_data<= (signed'(rs1_data)<signed'(imm_e))? 1:0;
-                sltIu: rf_write_data<= (rs1_data<imm_e)? 1:0;
-                xorI: rf_write_data<= rs1_data^imm_e;
+                addi: rf_write_data<= rs1_data+imm_d;
+                sllI: rf_write_data<= rs1_data<<imm_d[4:0];
+                sltI: rf_write_data<= (signed'(rs1_data)<signed'(imm_d))? 1:0;
+                sltIu: rf_write_data<= (rs1_data<imm_d)? 1:0;
+                xorI: rf_write_data<= rs1_data^imm_d;
                 srxI: 
-                      if( imm_e[11:5]==4'h00) rf_write_data<= rs1_data>>imm_e[4:0];
-                      else if(imm_e[11:5]==4'h20) rf_write_data<= rs1_data>>>imm_e[4:0];
-                orI: rf_write_data<= rs1_data|imm_e;
-                AndI: rf_write_data<= rs1_data&imm_e;
+                      if( imm_e[11:5]==4'h00) rf_write_data<= rs1_data>>imm_d[4:0];
+                      else if(imm_e[11:5]==4'h20) rf_write_data<= rs1_data>>>imm_d[4:0];
+                orI: rf_write_data<= rs1_data|imm_d;
+                AndI: rf_write_data<= rs1_data&imm_d;
 
              endcase
   U_TYPE_0: rf_write_data<= imm_e<<12;
