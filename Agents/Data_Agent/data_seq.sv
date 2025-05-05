@@ -1,8 +1,9 @@
 class data_seq extends uvm_sequence #(data_seq_item);
     `uvm_object_utils(data_seq)    
-    ins_seq_item req,rsp;
-    ins_seq_item q [$:2];
+    data_seq_item req,rsp;
+    data_seq_item q [$:2];
     [7:0] data_mem [int];
+    cfg data_agent_cfg;
     //[31:0] data_mem [32];
 
     
@@ -14,9 +15,9 @@ class data_seq extends uvm_sequence #(data_seq_item);
 
     virtual task pre_body();
         `uvm_info("Seq", "Starting pre body ", UVM_MEDIUM)
-        cfg=alu_cfg::type_id::create("cfg");
+        cfg=data_agent_cfg::type_id::create("cfg");
 
-        if(!uvm_config_db#(alu_cfg)::get(m_sequencer, "", "cfg", cfg))
+        if(!uvm_config_db#(data_agent_cfg)::get(m_sequencer, "", "cfg", cfg))
             `uvm_fatal("NOCFG", "No configuration object found");
         
         num_items = cfg.num_items;
@@ -28,12 +29,15 @@ class data_seq extends uvm_sequence #(data_seq_item);
 
         `uvm_info("Seq", "Starting sequence", UVM_MEDIUM)
     
-        item = seq_item::type_id::create("item");
+        rsp = data_seq_item::type_id::create("rsp");
         // Load the memory with some important values
         {data_mem[0],data_mem[1],data_mem[2],data_mem[3]} = 32'b0;               // zero
         {data_mem[4],data_mem[5],data_mem[6],data_mem[7]} = {1'b0,31{1'b1}};     // max positive
         {data_mem[8],data_mem[8],data_mem[10],data_mem[11]} = {1'b1,31{1'b0}};   // max positive
-
+        for(int i=12;i<inst_num; i=i+4) begin
+            assert(rsp.randomize);
+            {data_mem[i],data_mem[i+1],data_mem[i+2],data_memi[i+3]}= rsp.data;
+        end
 
         forever begin
 
