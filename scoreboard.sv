@@ -33,121 +33,122 @@ class riscv_scoreboard extends uvm_scoreboard;
 
 task decode()
   //inst.Get_type();
-  opcode<=inst.instr[6:0];
-  pc<=inst.instr_addr_o;
-  case(inst.opcode)
+  opcode<=inst_seq.instr_rdata_i[6:0];
+  pc<=inst_seq.instr_addr_o;
+  case(inst_seq.opcode)
     R_TYPE:
       begin
-        rs1<=instr[19:15]; //not sure in all of the cases
-        rs2<=instr[24:20]; //not sure in all of the cases
-        rs1_data<=reg_file[instr[19:15]];
-        rs2_data<=reg_file[instr[24:20]];
-        rd_e<=instr[11:7];
-        funct3<=instr[14:12];
-        funct7<=instr[31:25];
+        rs1<=inst_seq.instr_rdata_i[19:15]; //not sure in all of the cases
+        rs2<=inst_seq.instr_rdata_i[24:20]; //not sure in all of the cases
+        rs1_data<=reg_file[inst_seq.instr_rdata_i[19:15]];
+        rs2_data<=reg_file[inst_seq.instr_rdata_i[24:20]];
+        rd_e<=inst_seq.instr_rdata_i[11:7];
+        funct3<=inst_seq.instr_rdata_i[14:12];
+        funct7<=inst_seq.instr_rdata_i[31:25];
         imm_d<=0;
       end
     I_TYPE_0:
       begin
-        rs1<=instr[19:15];
-        rs1_data<=reg_file[instr[19:15]];
-        rd_e<=instr[11:7];
-        funct3<=instr[14:12];
+        rs1<=inst_seq.instr_rdata_i[19:15];
+        rs1_data<=reg_file[inst_seq.instr_rdata_i[19:15]];
+        rd_e<=inst_seq.instr_rdata_i[11:7];
+        funct3<=inst_seq.instr_rdata_i[14:12];
         funct7<=0;
-        imm_d<={{20{instr[31]}},instr[31:20]} ;
+        imm_d<={{20{inst_seq.instr_rdata_i[31]}},inst_seq.instr_rdata_i[31:20]} ;
       end
     I_TYPE_1:
       begin
-        rs1<=instr[19:15];
-        rs1_data<=reg_file[instr[19:15]];
-        rd_e<=instr[11:7];
-        funct3<=instr[14:12];
+        rs1<=inst_seq.instr_rdata_i[19:15];
+        rs1_data<=reg_file[inst_seq.instr_rdata_i[19:15]];
+        rd_e<=inst_seq.instr_rdata_i[11:7];
+        funct3<=inst_seq.instr_rdata_i[14:12];
         funct7<=0;
-        imm_d<={{20{instr[31]}} ,instr[31:20]} ;
+        imm_d<={{20{inst_seq.instr_rdata_i[31]}} ,inst_seq.instr_rdata_i[31:20]} ;
       end
     I_TYPE_2:
       begin
-        rs1<=instr[19:15];
-        rs1_data<=reg_file[instr[19:15]];
-        rd_e<=instr[11:7];
-        funct3<=instr[14:12];
+        rs1<=inst_seq.instr_rdata_i[19:15];
+        rs1_data<=reg_file[inst_seq.instr_rdata_i[19:15]];
+        rd_e<=inst_seq.instr_rdata_i[11:7];
+        funct3<=inst_seq.instr_rdata_i[14:12];
         funct7<=0;
-        imm_d<={{20{instr[31]}} ,instr[31:20]} ;
+        imm_d<={{20{inst_seq.instr_rdata_i[31]}} ,inst_seq.instr_rdata_i[31:20]} ;
       end
     S_TYPE:
       begin
-        rs1<=instr[19:15];
-        rs2<=instr[24:20];
-        rs1_data<=reg_file[instr[19:15]];
-        rs2_data<=reg_file[instr[24:20]];
-        funct3<=instr[14:12];
+        rs1<=inst_seq.instr_rdata_i[19:15];
+        rs2<=inst_seq.instr_rdata_i[24:20];
+        rs1_data<=reg_file[inst_seq.instr_rdata_i[19:15]];
+        rs2_data<=reg_file[inst_seq.instr_rdata_i[24:20]];
+        funct3<=inst_seq.instr_rdata_i[14:12];
         funct7<=0;
-        imm_d<={ {20{instr[31]}},instr[31:25], instr[11:7] };
+        imm_d<={ {20{inst_seq.instr_rdata_i[31]}},inst_seq.instr_rdata_i[31:25], inst_seq.instr_rdata_i[11:7] };
       end
     B_TYPE:
       begin
-        rs1<=instr[19:15];
-        rs2<=instr[24:20];
-        rs1_data<=reg_file[instr[19:15]];
-        rs2_data<=reg_file[instr[24:20]];
-        funct3<=instr[14:12];
+        rs1<=inst_seq.instr_rdata_i[19:15];
+        rs2<=inst_seq.instr_rdata_i[24:20];
+        rs1_data<=reg_file[inst_seq.instr_rdata_i[19:15]];
+        rs2_data<=reg_file[inst_seq.instr_rdata_i[24:20]];
+        funct3<=inst_seq.instr_rdata_i[14:12];
         funct7<=0;
         imm_d[0]<=0;
-        imm_d[11]<=instr[7];
-        imm_d[4:1]<=instr[11:8];
-        imm_d[10:5]<=instr[30:25];
-        imm_d[12]<=instr[31];
+        imm_d[11]<=inst_seq.instr_rdata_i[7];
+        imm_d[4:1]<=inst_seq.instr_rdata_i[11:8];
+        imm_d[10:5]<=inst_seq.instr_rdata_i[30:25];
+        imm_d[12]<=inst_seq.instr_rdata_i[31];
       end
     U_TYPE_0:
       begin
-        rd_e<=instr[11:7];
+        rd_e<=inst_seq.instr_rdata_i[11:7];
         funct3<=0;
         funct7<=0;
-        imm_d[31:12]<={instr[31:12], 12'b0};
+        imm_d[31:12]<={inst_seq.instr_rdata_i[31:12], 12'b0};
       end
     U_TYPE_1:
       begin
-        rd_e<=instr[11:7];
+        rd_e<=inst_seq.instr_rdata_i[11:7];
         funct3<=0;
         funct7<=0;
-        imm_d<={ {12{instr[31]}}, instr[31:12] };
+        imm_d<={ {12{inst_seq.instr_rdata_i[31]}}, inst_seq.instr_rdata_i[31:12] };
       end
     J_TYPE:
       begin
-        rd_e<=instr[11:7];
+        rd_e<=inst_seq.instr_rdata_i[11:7];
         funct3<=0;
         funct7<=0;
-        imm_d<={ instr[31],instr[19:12],instr[20],instr[30:21],1'b0 };
+        imm_d<={ inst_seq.instr_rdata_i[31],inst_seq.instr_rdata_i[19:12],inst_seq.instr_rdata_i[20],inst_seq.instr_rdata_i[30:21],1'b0 };
       end
   endcase
 endtask
 task execute()
+  imm_e<=imm_d;
   rf_write_addr<=rd_e;
   rf_write_en<=1;
   case(opcode)
   7'b0010011:
              case(funct3)
                 2'h00: rf_write_data<= rs1_data+imm_e;
-                2'h01: rf_write_data<= rs1_data<<imm[4:0];
-                2'h02: rf_write_data<= (signed'(rs1_data)<signed'(imm))? 1:0;
-                2'h03: rf_write_data<= (rs1_data<imm)? 1:0;
-                2'h04: rf_write_data<= rs1_data^imm;
+                2'h01: rf_write_data<= rs1_data<<imm_e[4:0];
+                2'h02: rf_write_data<= (signed'(rs1_data)<signed'(imm_e))? 1:0;
+                2'h03: rf_write_data<= (rs1_data<imm_e)? 1:0;
+                2'h04: rf_write_data<= rs1_data^imm_e;
                 2'h05: 
-                      if( imm[11:5]=4'h00) rf_write_addr<= rs1_data>>imm[4:0];
-                      else if(imm[11:5]=4'h20) rf_write_addr<= rs1_data>>>imm[4:0];
-                2'h06: rf_write_data<= rs1_data|imm;
-                2'h07: rf_write_data<= rs1_data&imm;
+                      if( imm_e[11:5]==4'h00) rf_write_data<= rs1_data>>imm_e[4:0];
+                      else if(imm_e[11:5]==4'h20) rf_write_data<= rs1_data>>>imm_e[4:0];
+                2'h06: rf_write_data<= rs1_data|imm_e;
+                2'h07: rf_write_data<= rs1_data&imm_e;
 
              endcase
-  7'b0110111: rf_write_data<= imm<<12;
-  7'b0010111: rf_write_data<= pc+(imm<<12);
+  7'b0110111: rf_write_data<= imm_e<<12;
+  7'b0010111: rf_write_data<= pc+(imm_e<<12);
 
   endcase
 endtask
 
 task wb()
-    if(wb_addr!=0) begin
-      reg_file[wb_addr]<=rf_write_data;
+    if(rf_write_addr!=0) begin
+      reg_file[rf_write_addr]<=rf_write_data;
     end
   
 endtask
@@ -163,17 +164,7 @@ endtask
   mul_ap //excute
   reg_file_ap //decode and writeback
 
-task reg_file_assign();
-    reg_file[reg_item.reg_addr1] = reg_item.reg_data1;
-    reg_file[reg_item.reg_addr2] = reg_item.reg_data2;
-    reg_file[reg_item.reg_addr3] = reg_item.reg_data3;
-    if (reg_item.reg_write) begin
-        reg_file[reg_item.reg_addr] = reg_item.reg_data;
-    end
-    if (reg_item.reg_write) begin
-        reg_file[reg_item.reg_addr] = reg_item.reg_data;
-    end
-endtask
+
 
   // alu_div agent
   // env 
