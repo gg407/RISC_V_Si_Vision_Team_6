@@ -18,7 +18,7 @@ class inst_seq extends uvm_sequence #(inst_seq_item);
         `uvm_info("Seq", "Starting pre body ", UVM_MEDIUM)
         cfg=ins_cfg::type_id::create("cfg");
 
-        if(!uvm_config_db#(ins_cfg)::get(m_sequencer, "", "cfg", cfg))
+        if(!uvm_config_db#(ins_cfg)::get(get_sequencer(), "", "cfg", cfg))
             `uvm_fatal("NOCFG", "No configuration object found");
         
         inst_num = cfg.inst_num;
