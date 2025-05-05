@@ -103,7 +103,7 @@ task decode()
         rd_e<=inst_seq.instr_rdata_i[11:7];
         funct3<=0;
         funct7<=0;
-        imm_d[31:12]<={inst_seq.instr_rdata_i[31:12], 12'b0};
+        imm_d<={ {12{inst_seq.instr_rdata_i[31]}}, inst_seq.instr_rdata_i[31:12] };
       end
     U_TYPE_1:
       begin
