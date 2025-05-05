@@ -17,7 +17,7 @@ class data_seq extends uvm_sequence #(data_seq_item);
         `uvm_info("Seq", "Starting pre body ", UVM_MEDIUM)
         cfg=data_agent_cfg::type_id::create("cfg");
 
-        if(!uvm_config_db#(data_agent_cfg)::get(m_sequencer, "", "cfg", cfg))
+        if(!uvm_config_db#(data_agent_cfg)::get(get_sequencer(), "", "cfg", cfg))
             `uvm_fatal("NOCFG", "No configuration object found");
         
         num_items = cfg.num_items;
