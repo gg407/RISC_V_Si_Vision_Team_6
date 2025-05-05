@@ -28,8 +28,8 @@ class inst_seq extends uvm_sequence #(inst_seq_item);
 
     virtual task body();
         `uvm_info("Seq", "Starting sequence", UVM_MEDIUM)
-        req = seq_item::type_id::create("req");
-        rsp = seq_item::type_id::create("rsp");
+        req = ins_seq_item::type_id::create("req");
+        rsp = ins_seq_item::type_id::create("rsp");
         for(int i=0;i<inst_num; i=i+4) begin
             assert(rsp.randomize with { opcode !(inside {7'b1100011,7'b1101111,7'b1100111}); 
                                         funct7 != 2'h01;});
